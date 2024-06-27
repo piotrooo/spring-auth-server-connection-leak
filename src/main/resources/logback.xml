@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <logger name="com.zaxxer.hikari.HikariConfig" level="DEBUG"/>
+    <logger name="com.zaxxer.hikari" level="TRACE"/>
+    <logger name="org.springframework.jdbc" level="DEBUG"/>
+<!--    <logger name="org.springframework.security" level="TRACE"/>-->
+    <logger name="org.zalando.logbook" level="TRACE"/>
+
+    <springProfile name="default | local">
+        <property name="CONSOLE_LOG_PATTERN"
+                  value="%date{yyyy-MM-dd HH:mm:ss.SSS} %-5p [%thread] [%logger{39}] [%mdc{traceId}]: %msg%n%wEx"/>
+
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod | stage | dev">
+        <appender name="SENTRY" class="io.sentry.logback.SentryAppender">
+            <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                <level>ERROR</level>
+            </filter>
+        </appender>
+
+        <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <shortenedLoggerNameLength>39</shortenedLoggerNameLength>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON"/>
+            <appender-ref ref="SENTRY"/>
+        </root>
+    </springProfile>
+</configuration>
